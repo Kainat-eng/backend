@@ -1,17 +1,6 @@
-// import mongoose from 'mongoose';
-
-// const usersSchema = new mongoose.Schema({
-//     firstname: String,
-//     lastname: String,
-//     email: String,
-//     password: String,
-// }, { timestamps: true });
-
-// export default mongoose.model("Users", usersSchema);
-
 import mongoose from 'mongoose';
 
-const usersSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     firstname: {
         type: String,
         default: null
@@ -27,15 +16,20 @@ const usersSchema = new mongoose.Schema({
     password: {
         type: String,
     },
-    role: { 
-        type: String, 
-        default: "user", 
-        enum: ["user", "admin"] 
+    // role: { 
+    //     type: String, 
+    //     default: "user", 
+    //     enum: ["user", "admin", "server_admin"] 
+    // },
+     role: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Role", 
+        required: true 
     },
     token: {
         type: String,
         default: null
-    },
-})
+    }
+});
 
-export default mongoose.model("Users", usersSchema);
+export default mongoose.model("User", userSchema);
