@@ -5,7 +5,8 @@ import {
   updatePermission,
   deletePermission,
 } from '../controllers/admin/permissionController.js';
-import { verifyToken, verifyRole } from '../middleware/authMiddleware.js';
+import { verifyFirebaseToken as verifyToken, verifyRole } from '../middleware/verifyFirebaseToken.js';
+
 
 const router = express.Router();
 

@@ -101,6 +101,7 @@
 // });
 
 // export default router;
+
 import express from 'express';
 import {
   registerUser,
@@ -111,19 +112,35 @@ import {
 } from '../controllers/authController.js';
 import {
   registerValidation,
-  loginValidation,
   roleAssignmentValidation
 } from '../helpers/validators/authValidator.js';
 import { validate } from '../middleware/validate.js';
-import { verifyToken, verifyRole } from '../middleware/authMiddleware.js';
+import { verifyFirebaseToken, verifyRole } from '../middleware/verifyFirebaseToken.js';
 import checkPermission from '../middleware/checkPermission.js';
 
 const router = express.Router();
 
 router.post('/register', registerValidation, validate, registerUser);
-router.post('/login', loginValidation, validate, loginUser);
-router.put('/assign-role/:id', verifyToken, checkPermission('assign:role'), roleAssignmentValidation, validate, assignRole);
-router.get('/users', verifyToken, verifyRole('Admin'), getAllUsers);
-router.put('/users/:id', verifyToken, verifyRole('Admin'), updateUser);
+router.post('/login', loginUser);
+
+// 🔁 FIXED: Replaced verifyToken with verifyFirebaseToken
+router.put(
+  '/assign-role/:id',
+  verifyFirebaseToken,
+  checkPermission('assign:role'),
+  roleAssignmentValidation,
+  validate,
+  assignRole
+);
+
+// 🔁 FIXED: Replaced verifyToken with verifyFirebaseToken
+router.get('/users', verifyFirebaseToken, verifyRole(['Admin']), getAllUsers);
+
+// 🔁 FIXED: Replaced verifyToken with verifyFirebaseToken
+router.put('/users/:id', verifyFirebaseToken, verifyRole(['Admin']), updateUser);
+
+router.get('/admin-data', verifyFirebaseToken, verifyRole(['Admin']), (req, res) => {
+  res.send("Protected admin data");
+});
 
 export default router;

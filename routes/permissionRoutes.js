@@ -5,7 +5,8 @@ import {
   updatePermission,
   deletePermission,
 } from '../controllers/permissionController.js';
-import { verifyToken, verifyRole } from '../middleware/authMiddleware.js'; // Import the middlewares
+import { verifyFirebaseToken as verifyToken, verifyRole } from '../middleware/verifyFirebaseToken.js';
+ // Import the middlewares
 import checkPermission from '../middleware/checkPermission.js'; // Import the permission check
 
 const router = express.Router();

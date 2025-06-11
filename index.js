@@ -198,55 +198,120 @@
 //     console.log(`Server is running on http://localhost:${PORT}`);
 // });
 
-import express, { json } from 'express';
+// import express, { json } from 'express';
+// import cookieParser from 'cookie-parser';
+// import cors from 'cors';
+// import dotenv from 'dotenv';
+// import connectDB from './db/Connection.js';  // Import connection
+// import authRoutes from './routes/authRoutes.js';
+// import serverRoutes from './routes/serverRoutes.js';
+// import permissionRoutes from './routes/permissionRoutes.js';
+// import cron from 'node-cron';
+// import './cron/index.js'; // This will start the cron job
+// import collectMetrics from './cron/collectMetrics.js';
+// import systemMetricsRoutes from './routes/systemMetricsRoutes.js';
+// import { trackUptime } from './cron/uptimeTracker.js';
+// import systemRoutes from './routes/systemRoutes.js';  // Add the '.js' extension
+
+// dotenv.config();
+
+// const app = express();
+
+// // Connect to MongoDB
+// connectDB();
+
+// // CORS Configuration
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+// }));
+
+// // Middleware
+// app.use(json());
+// app.use(cookieParser());
+// app.options('*', cors());
+
+// // Routes
+// app.use('/api/system-metrics', systemMetricsRoutes);
+
+
+// // Collect metrics every 1 minute
+// cron.schedule('* * * * *', collectMetrics);
+// setInterval(trackUptime, 60 * 1000);
+// app.use('/api', systemRoutes);
+// app.use('/api/auth', authRoutes);              // login, register, forgot-password
+// app.use('/api/server', serverRoutes);          // ServerAdmin operations (e.g., server CRUD)
+// app.use('/api/permissions', permissionRoutes); // permission CRUD for Admin
+
+// // Start Server
+// const PORT = process.env.PORT || 4000;
+// app.listen(PORT, () => {
+//   console.log(`Server is running on http://localhost:${PORT}`);
+// });
+
+
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import connectDB from './db/Connection.js';  // Import connection
+
 import authRoutes from './routes/authRoutes.js';
 import serverRoutes from './routes/serverRoutes.js';
 import permissionRoutes from './routes/permissionRoutes.js';
-import cron from 'node-cron';
-import './cron/index.js'; // This will start the cron job
-import collectMetrics from './cron/collectMetrics.js';
 import systemMetricsRoutes from './routes/systemMetricsRoutes.js';
+import systemRoutes from './routes/systemRoutes.js';
+
+import cron from 'node-cron';
+import './cron/index.js';  // Initialize cron jobs
+import collectMetrics from './cron/collectMetrics.js';
 import { trackUptime } from './cron/uptimeTracker.js';
-import systemRoutes from './routes/systemRoutes.js';  // Add the '.js' extension
+
+import { verifyFirebaseToken as verifyToken, verifyRole } from './middleware/verifyFirebaseToken.js';
+
 
 dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
-
-// CORS Configuration
+// CORS config
 app.use(cors({
   origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Server-ID'],
   credentials: true,
+  optionsSuccessStatus: 200
 }));
 
+
 // Middleware
-app.use(json());
+app.use(express.json());
 app.use(cookieParser());
 app.options('*', cors());
 
-// Routes
-app.use('/api/system-metrics', systemMetricsRoutes);
 
+app.use('/api/system-metrics',  systemMetricsRoutes);
 
-// Collect metrics every 1 minute
+// Other routes
+app.use('/api', systemRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/server', serverRoutes);
+app.use('/api/permissions', permissionRoutes);
+
+// Start cron jobs
 cron.schedule('* * * * *', collectMetrics);
 setInterval(trackUptime, 60 * 1000);
-app.use('/api', systemRoutes);
-app.use('/api/auth', authRoutes);              // login, register, forgot-password
-app.use('/api/server', serverRoutes);          // ServerAdmin operations (e.g., server CRUD)
-app.use('/api/permissions', permissionRoutes); // permission CRUD for Admin
 
-// Start Server
+app.post('/metrics', (req, res) => {
+  console.log('[SERVER] Received payload:', req.body);
+  res.status(200).send('OK');
+});
+
+
+// Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
+
